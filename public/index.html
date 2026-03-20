@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EstateIQ — Real Estate Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="logo">Estate<span>IQ</span></div>
+    <nav>
+      <button class="nav-btn active" data-tab="properties">Properties</button>
+      <button class="nav-btn" data-tab="add-property">Add Property</button>
+      <button class="nav-btn" data-tab="agents">Agents</button>
+      <button class="nav-btn" data-tab="reports">Reports</button>
+    </nav>
+  </header>
+
+  <!-- ── MAIN ─────────────────────────────────────────────── -->
+  <main>
+
+    <!-- ══ TAB: PROPERTIES ════════════════════════════════ -->
+    <section id="tab-properties" class="tab-panel active">
+      <div class="panel-header">
+        <h1>All Properties</h1>
+        <div class="filters">
+          <select id="filter-status">
+            <option value="">All Status</option>
+            <option value="Available">Available</option>
+            <option value="Sold">Sold</option>
+            <option value="Rented">Rented</option>
+          </select>
+          <select id="filter-type">
+            <option value="">All Types</option>
+            <option value="House">House</option>
+            <option value="Apartment">Apartment</option>
+          </select>
+          <input type="number" id="filter-bedrooms" placeholder="Min Beds" min="1" />
+          <button class="btn-primary" id="apply-filters">Filter</button>
+          <button class="btn-ghost" id="clear-filters">Clear</button>
+        </div>
+      </div>
+      <div id="property-grid" class="property-grid">
+        <div class="loading-shimmer"></div>
+      </div>
+    </section>
+
+    <!-- ══ TAB: ADD PROPERTY ══════════════════════════════ -->
+    <section id="tab-add-property" class="tab-panel">
+      <div class="panel-header"><h1>List a New Property</h1></div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Property Type *</label>
+            <select id="f-type" required>
+              <option value="">Select type</option>
+              <option value="House">House</option>
+              <option value="Apartment">Apartment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="f-status">
+              <option value="Available">Available</option>
+              <option value="Sold">Sold</option>
+              <option value="Rented">Rented</option>
+            </select>
+          </div>
+          <div class="form-group span-2">
+            <label>Address Line *</label>
+            <input type="text" id="f-address" placeholder="e.g. A-101, Sunrise Heights, Link Road" />
+          </div>
+          <div class="form-group">
+            <label>Locality *</label>
+            <select id="f-locality"><option value="">Loading…</option></select>
+          </div>
+          <div class="form-group">
+            <label>Agent ID *</label>
+            <input type="number" id="f-agent" placeholder="Agent ID" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Selling Price (₹) *</label>
+            <input type="number" id="f-price" placeholder="e.g. 4500000" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Monthly Rent (₹) *</label>
+            <input type="number" id="f-rent" placeholder="e.g. 18000" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Size (sq ft) *</label>
+            <input type="number" id="f-size" placeholder="e.g. 850" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Bedrooms *</label>
+            <input type="number" id="f-beds" placeholder="e.g. 2" min="1" max="20" />
+          </div>
+          <div class="form-group">
+            <label>Year Constructed *</label>
+            <input type="number" id="f-year" placeholder="e.g. 2018" min="1900" max="2099" />
+          </div>
+          <div class="form-group">
+            <label>Listing Date *</label>
+            <input type="date" id="f-listing-date" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary btn-lg" id="submit-property">Submit Property</button>
+        </div>
+        <div id="form-msg" class="form-message hidden"></div>
+      </div>
+    </section>
+
+    <!-- ══ TAB: AGENTS ════════════════════════════════════ -->
+    <section id="tab-agents" class="tab-panel">
+      <div class="panel-header"><h1>Agent Dashboard</h1></div>
+      <div id="agent-grid" class="agent-grid">
+        <div class="loading-shimmer"></div>
+      </div>
+    </section>
+
+    <!-- ══ TAB: REPORTS ═══════════════════════════════════ -->
+    <section id="tab-reports" class="tab-panel">
+      <div class="panel-header"><h1>Analytics &amp; Reports</h1></div>
+
+      <div class="reports-grid">
+
+        <!-- Report 1 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">01</span>
+            <h3>New Properties for Rent</h3>
+            <p>Built after 2023, currently available</p>
+          </div>
+          <button class="btn-report" data-report="new-rentals">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+        <!-- Report 2 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">02</span>
+            <h3>Price Range Filter</h3>
+            <p>Properties between 20L – 60L</p>
+          </div>
+          <div class="report-inputs">
+            <input type="number" class="r-input" id="r2-min" placeholder="Min ₹" value="2000000" />
+            <input type="number" class="r-input" id="r2-max" placeholder="Max ₹" value="6000000" />
+          </div>
+          <button class="btn-report" data-report="price-range">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+        <!-- Report 3 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">03</span>
+            <h3>Rental Filter</h3>
+            <p>≥2 BHK, rent &lt; ₹15,000 in locality</p>
+          </div>
+          <div class="report-inputs">
+            <input type="text" class="r-input" id="r3-locality" placeholder="Locality" value="Andheri West" />
+            <input type="number" class="r-input" id="r3-beds" placeholder="Min Beds" value="2" />
+            <input type="number" class="r-input" id="r3-rent" placeholder="Max Rent" value="15000" />
+          </div>
+          <button class="btn-report" data-report="rent-filter">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+        <!-- Report 4 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">04</span>
+            <h3>Top Selling Agent</h3>
+            <p>Agent with highest sales by total amount</p>
+          </div>
+          <div class="report-inputs">
+            <input type="number" class="r-input" id="r4-year" placeholder="Year" value="2023" />
+          </div>
+          <button class="btn-report" data-report="top-agent">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+        <!-- Report 5 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">05</span>
+            <h3>Agent Averages</h3>
+            <p>Avg price &amp; avg days on market per agent</p>
+          </div>
+          <div class="report-inputs">
+            <input type="number" class="r-input" id="r5-year" placeholder="Year" value="2018" />
+          </div>
+          <button class="btn-report" data-report="agent-avg">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+        <!-- Report 6 -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <span class="report-number">06</span>
+            <h3>Extreme Properties</h3>
+            <p>Most expensive &amp; highest rent</p>
+          </div>
+          <button class="btn-report" data-report="extremes">Run Query</button>
+          <div class="report-result hidden"></div>
+        </div>
+
+      </div><!-- /reports-grid -->
+    </section>
+
+  </main>
+
+  <!-- ── PROPERTY MODAL ──────────────────────────────────── -->
+  <div id="property-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <button class="modal-close">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
