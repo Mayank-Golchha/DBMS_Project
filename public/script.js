@@ -152,14 +152,35 @@ async function loadAgents() {
 }
 
 // ── ADD PROPERTY form ──────────────────────────────────────
-async function loadLocalities() {
-  try {
-    const res  = await fetch(`${API}/reports/localities`);
-    const json = await res.json();
-    const sel  = document.getElementById("f-locality");
-    sel.innerHTML = '<option value="">Select locality</option>' +
-      json.data.map((l) => `<option value="${l.locality_id}">${l.locality_name}</option>`).join("");
-  } catch (e) { console.error("Could not load localities", e); }
+async function loadLocalities(retries = 5) {
+  const sel = document.getElementById("f-locality");
+  sel.innerHTML = '<option value="">Loading localities…</option>';
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res  = await fetch(`${API}/reports/localities`);
+      const json = await res.json();
+      if (json.success && json.data.length) {
+        sel.innerHTML = '<option value="">Select locality</option>' +
+          json.data.map((l) => `<option value="${l.locality_id}">${l.locality_name}</option>`).join("");
+        return;
+      }
+    } catch (e) {
+      console.warn(`Localities fetch attempt ${i + 1} failed, retrying…`);
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  // Fallback: hardcoded localities if API keeps failing
+  sel.innerHTML = `
+    <option value="">Select locality</option>
+    <option value="1">Andheri West</option>
+    <option value="2">Bandra East</option>
+    <option value="3">Powai</option>
+    <option value="4">Malad West</option>
+    <option value="5">Borivali North</option>
+    <option value="6">Thane West</option>
+    <option value="7">Navi Mumbai</option>
+    <option value="8">Juhu</option>
+  `;
 }
 
 document.getElementById("submit-property").addEventListener("click", async () => {
