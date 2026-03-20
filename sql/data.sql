@@ -73,7 +73,7 @@ VALUES
 ('Apartment', 'B-204, Park View Residency, DN Nagar',   1, 3200000,  13000, 650,  1, 2018, '2024-03-10', 'Available', 1),
 
 -- Bandra East (locality 2)
-('Apartment', 'C-301, Royal Enclave, BKC Road',         2, 8500000,  35000, 1100, 3, 2015, '2023-06-20', 'Available', 3),
+('Apartment', 'C-301, Royal Enclave, BKC Road',         2, 8500000,  35000, 1100, 3, 2015, '2018-01-05', 'Sold',      3),
 ('House',     '7, Hill View Bungalow, Reclamation',     2, 15000000, 55000, 2200, 4, 2019, '2023-09-05', 'Available', 4),
 ('Apartment', 'D-502, Sky Towers, Kalanagar',           2, 5600000,  22000, 950,  2, 2020, '2024-01-11', 'Rented',    3),
 
@@ -114,20 +114,14 @@ VALUES
 INSERT INTO sales_transactions
   (property_id, agent_id, buyer_id, seller_id, sale_price, sale_date, days_on_market)
 VALUES
-(2,  2,  1,  2,  7000000,  '2023-03-15', 134),   -- Arjun sold in Andheri
-(8,  6,  3,  6,  11800000, '2023-07-22', 252),   -- Sneha sold in Powai
-(13, 9,  5,  10, 6700000,  '2023-11-10', 184),   -- Sanjay sold in Borivali
-(21, 3,  7,  16, 5050000,  '2023-09-01', 305),   -- Arjun sold in Navi Mumbai
-(2,  2,  1,  2,  7000000,  '2018-03-15', 98),    -- duplicate sale_id avoided: different property
--- Fix: use unique property_ids for each sale
-(11, 8,  9,  12, 5400000,  '2018-06-20', 155),   -- Neha sold in Malad
-(20, 2,  11, 18, 7500000,  '2018-09-12', 210),   -- Priya sold in Navi Mumbai
-(17, 12, 13, 14, 9300000,  '2018-12-01', 175);   -- Meena sold in Thane
-
--- NOTE: The duplicate row above will error on property_id UNIQUE constraint.
--- Corrected version removes duplicate; see comment. The valid rows are:
--- (2,8,13,21,11,20,17) each once.
--- For cleanliness, re-run only unique property_ids. Data.sql is idempotent when run fresh.
+(2,  2,  1,  2,  7000000,  '2023-03-15', 134),   -- Priya    | Andheri West House
+(8,  6,  3,  6,  11800000, '2023-07-22', 252),   -- Anjali   | Powai House
+(13, 9,  5,  10, 6700000,  '2023-11-10', 184),   -- Sanjay   | Borivali House
+(21, 3,  7,  16, 5050000,  '2023-09-01', 305),   -- Arjun    | Navi Mumbai Apt
+(4,  4,  9,  12, 8400000,  '2018-03-15', 98),    -- Sneha    | Bandra Apt (2018)
+(11, 8,  11, 18, 5400000,  '2018-06-20', 155),   -- Neha     | Malad House (2018)
+(20, 2,  13, 14, 7500000,  '2018-09-12', 210),   -- Priya    | Navi Mumbai House (2018)
+(17, 12, 15, 20, 9300000,  '2018-12-01', 175);   -- Meena    | Thane House (2018)
 
 -- ------------------------------------------------------------
 -- RENTAL TRANSACTIONS (8 records)
