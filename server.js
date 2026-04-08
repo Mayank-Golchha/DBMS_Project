@@ -11,6 +11,8 @@ const path       = require("path");
 const propertiesRouter = require("./routes/properties");
 const agentsRouter     = require("./routes/agents");
 const reportsRouter    = require("./routes/reports");
+const clientsRouter      = require("./routes/clients");
+const transactionsRouter = require("./routes/transactions");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +29,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/properties", propertiesRouter);
 app.use("/api/agents",     agentsRouter);
 app.use("/api/reports",    reportsRouter);
+app.use("/api/clients", clientsRouter);
+app.use("/api/transactions", transactionsRouter);
 
 // ── Health check ───────────────────────────────────────────
 app.get("/api/health", (_req, res) => {

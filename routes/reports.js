@@ -55,31 +55,153 @@ router.get("/price-range", async (req, res) => {
 
 // ── GET /api/reports/rent-filter?locality=Andheri%20West&bedrooms=2&max_rent=15000
 // Query 3: Rentals filtered by locality, bedrooms, rent cap
+// router.get("/rent-filter", async (req, res) => {
+//   try {
+//     const locality  = req.query.locality  || "Andheri West";
+//     const bedrooms  = req.query.bedrooms  || 2;
+//     const max_rent  = req.query.max_rent  || 15000;
+//     const [rows] = await db.execute(`
+//       SELECT p.property_id, p.property_type, p.address_line,
+//              l.locality_name, p.num_bedrooms,
+//              p.monthly_rent, p.size_sqft, p.year_constructed
+//       FROM properties p
+//       JOIN localities l ON p.locality_id = l.locality_id
+//       WHERE l.locality_name = ?
+//         AND p.num_bedrooms  >= ?
+//         AND p.monthly_rent  <  ?
+//         AND p.status        = 'Available'
+//       ORDER BY p.monthly_rent`,
+//       [locality, bedrooms, max_rent]
+//     );
+//     res.json({ success: true,
+//                query: `Rental in ${locality}, ≥${bedrooms} BHK, rent < ₹${max_rent}`,
+//                count: rows.length, data: rows });
+//   } catch (err) {
+//     res.status(500).json({ success: false, error: err.message });
+//   }
+// });
 router.get("/rent-filter", async (req, res) => {
   try {
-    const locality  = req.query.locality  || "Andheri West";
-    const bedrooms  = req.query.bedrooms  || 2;
-    const max_rent  = req.query.max_rent  || 15000;
-    const [rows] = await db.execute(`
+    const { locality, bedrooms, max_rent } = req.query;
+
+    let query = `
       SELECT p.property_id, p.property_type, p.address_line,
              l.locality_name, p.num_bedrooms,
-             p.monthly_rent, p.size_sqft, p.year_constructed
+             p.monthly_rent, p.size_sqft
       FROM properties p
       JOIN localities l ON p.locality_id = l.locality_id
-      WHERE l.locality_name = ?
-        AND p.num_bedrooms  >= ?
-        AND p.monthly_rent  <  ?
-        AND p.status        = 'Available'
-      ORDER BY p.monthly_rent`,
-      [locality, bedrooms, max_rent]
-    );
-    res.json({ success: true,
-               query: `Rental in ${locality}, ≥${bedrooms} BHK, rent < ₹${max_rent}`,
-               count: rows.length, data: rows });
+      WHERE p.status = 'Available'
+    `;
+
+    const params = [];
+
+    if (locality) {
+      query += " AND l.locality_name = ?";
+      params.push(locality);
+    }
+
+    if (bedrooms) {
+      query += " AND p.num_bedrooms >= ?";
+      params.push(bedrooms);
+    }
+
+    if (max_rent) {
+      query += " AND p.monthly_rent <= ?";
+      params.push(max_rent);
+    }
+
+    query += " ORDER BY p.monthly_rent";
+
+    const [rows] = await db.execute(query, params);
+
+    res.json({ success: true, count: rows.length, data: rows });
+
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+
+
+// ── GET /api/reports/transaction-filter
+router.get("/transaction-filter", async (req, res) => {
+  try {
+    // const { type, agent_id, min_amount, max_amount } = req.query;
+    const { type, agent_id, client_id, min_amount, max_amount } = req.query;
+
+    let salesQuery = `
+      SELECT 'Sale' AS type,
+             s.sale_id AS id,
+             p.address_line,
+             CONCAT(c.first_name,' ',c.last_name) AS client,
+             CONCAT(a.first_name,' ',a.last_name) AS agent,
+             s.sale_price AS amount,
+             s.sale_date AS date
+      FROM sales_transactions s
+      JOIN properties p ON s.property_id = p.property_id
+      JOIN clients c ON s.buyer_id = c.client_id
+      JOIN agents a ON s.agent_id = a.agent_id
+      WHERE 1=1
+    `;
+
+    let rentalQuery = `
+      SELECT 'Rent' AS type,
+             r.rental_id AS id,
+             p.address_line,
+             CONCAT(c.first_name,' ',c.last_name) AS client,
+             CONCAT(a.first_name,' ',a.last_name) AS agent,
+             r.monthly_rent AS amount,
+             r.start_date AS date
+      FROM rental_transactions r
+      JOIN properties p ON r.property_id = p.property_id
+      JOIN clients c ON r.tenant_id = c.client_id
+      JOIN agents a ON r.agent_id = a.agent_id
+      WHERE 1=1
+    `;
+
+    const params = [];
+
+    if (agent_id) {
+      salesQuery += " AND s.agent_id = ?";
+      rentalQuery += " AND r.agent_id = ?";
+      params.push(agent_id);
+    }
+
+    if (client_id) {
+      salesQuery += " AND s.buyer_id = ?";
+      rentalQuery += " AND r.tenant_id = ?";
+      params.push(client_id);
+    }
+
+    if (min_amount) {
+      salesQuery += " AND s.sale_price >= ?";
+      rentalQuery += " AND r.monthly_rent >= ?";
+      params.push(min_amount);
+    }
+
+    if (max_amount) {
+      salesQuery += " AND s.sale_price <= ?";
+      rentalQuery += " AND r.monthly_rent <= ?";
+      params.push(max_amount);
+    }
+
+    const [sales] = await db.execute(salesQuery, params);
+    const [rentals] = await db.execute(rentalQuery, params);
+
+    let result = [...sales, ...rentals];
+
+    if (type === "sale") result = sales;
+    if (type === "rent") result = rentals;
+
+    res.json({ success: true, data: result });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 
 // ── GET /api/reports/top-agent?year=2023
 // Query 4: Agent with highest total sales in a given year
@@ -163,6 +285,54 @@ router.get("/extremes", async (_req, res) => {
 router.get("/localities", async (_req, res) => {
   try {
     const [rows] = await db.execute("SELECT * FROM localities ORDER BY locality_name");
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// ── GET /api/reports/transaction-summary
+router.get("/transaction-summary", async (_req, res) => {
+  try {
+    const [[sales]] = await db.execute(`
+      SELECT COUNT(*) AS total_sales, SUM(sale_price) AS total_sales_amount
+      FROM sales_transactions
+    `);
+
+    const [[rentals]] = await db.execute(`
+      SELECT COUNT(*) AS total_rentals, SUM(monthly_rent) AS total_rent_amount
+      FROM rental_transactions
+    `);
+
+    res.json({
+      success: true,
+      data: {
+        sales,
+        rentals
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// ── GET /api/reports/client-activity
+router.get("/client-activity", async (_req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT c.client_id,
+             CONCAT(c.first_name,' ',c.last_name) AS client_name,
+             COUNT(s.sale_id) AS purchases,
+             COUNT(r.rental_id) AS rentals
+      FROM clients c
+      LEFT JOIN sales_transactions s ON c.client_id = s.buyer_id
+      LEFT JOIN rental_transactions r ON c.client_id = r.tenant_id
+      GROUP BY c.client_id
+      ORDER BY purchases DESC
+    `);
+
     res.json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

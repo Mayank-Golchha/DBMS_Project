@@ -1,0 +1,19 @@
+digraph "Real Estate ERD" {
+	rankdir=LR
+	agents [label="{agents|agent_id (PK)\lfirst_name\llast_name\lphone (UQ)\lemail (UQ)\lhire_date\llicense_no (UQ)\l}" shape=record]
+	localities [label="{localities|locality_id (PK)\llocality_name\lcity\lpincode\l}" shape=record]
+	properties [label="{properties|property_id (PK)\lproperty_type\laddress_line\lselling_price\lmonthly_rent\lsize_sqft\lnum_bedrooms\lyear_constructed\llisting_date\lstatus\l}" shape=record]
+	clients [label="{clients|client_id (PK)\lfirst_name\llast_name\lphone (UQ)\lemail (UQ)\lclient_type\l}" shape=record]
+	sales_transactions [label="{sales_transactions|sale_id (PK)\lsale_price\lsale_date\ldays_on_market\l}" shape=record]
+	rental_transactions [label="{rental_transactions|rental_id (PK)\lmonthly_rent\lstart_date\lend_date\ldays_on_market\l}" shape=record]
+	properties -> agents [label=listed_by_agent arrowhead=crow penwidth=2]
+	properties -> localities [label=located_in arrowhead=crow penwidth=2]
+	sales_transactions -> properties [label=property arrowhead=normal penwidth=2]
+	sales_transactions -> agents [label=agent arrowhead=crow penwidth=2]
+	sales_transactions -> clients [label=buyer arrowhead=crow penwidth=2]
+	sales_transactions -> clients [label=seller arrowhead=crow penwidth=2]
+	rental_transactions -> properties [label=property arrowhead=crow penwidth=2]
+	rental_transactions -> agents [label=agent arrowhead=crow penwidth=2]
+	rental_transactions -> clients [label=tenant arrowhead=crow penwidth=2]
+	rental_transactions -> clients [label=owner arrowhead=crow penwidth=2]
+}

@@ -17,6 +17,8 @@
       <button class="nav-btn active" data-tab="properties">Properties</button>
       <button class="nav-btn" data-tab="add-property">Add Property</button>
       <button class="nav-btn" data-tab="agents">Agents</button>
+      <button class="nav-btn" data-tab="clients">Clients</button>
+      <button class="nav-btn" data-tab="transactions">Transactions</button>
       <button class="nav-btn" data-tab="reports">Reports</button>
     </nav>
   </header>
@@ -117,11 +119,67 @@
 
     <!-- ══ TAB: AGENTS ════════════════════════════════════ -->
     <section id="tab-agents" class="tab-panel">
+      <div style="margin-bottom: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
+  
+  <input id="a-name" type="text" placeholder="Search by first name" />
+  <input id="a-min-sales" type="number" placeholder="Min Sales" />
+  <input id="a-min-rentals" type="number" placeholder="Min Rentals" />
+
+  <button id="apply-agent-filter">Apply Filter</button>
+</div>
       <div class="panel-header"><h1>Agent Dashboard</h1></div>
       <div id="agent-grid" class="agent-grid">
         <div class="loading-shimmer"></div>
       </div>
     </section>
+
+    <section id="tab-clients" class="tab-panel">
+      <div class="panel-header"><h1>Clients</h1></div>
+
+      <div style="margin-bottom: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
+  
+          <select id="c-type">
+            <option value="">All Types</option>
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+            <option value="tenant">Tenant</option>
+          </select>
+
+          <input id="c-min-budget" type="number" placeholder="Min Budget" />
+          <input id="c-max-budget" type="number" placeholder="Max Budget" />
+
+          <input id="c-location" type="text" placeholder="Preferred Location" />
+
+          <button id="apply-client-filter">Apply Filter</button>
+        </div>
+
+        <div id="clients-table"></div>
+
+    </section>
+
+    <section id="tab-transactions" class="tab-panel">
+  <div class="panel-header"><h1>Transactions</h1></div>
+
+  <!-- 🔽 FILTER UI -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
+      
+      <select id="t-type">
+        <option value="">All</option>
+        <option value="sale">Sale</option>
+        <option value="rent">Rent</option>
+      </select>
+
+      <input id="t-agent" type="number" placeholder="Agent ID" /> 
+      <input id="t-client" type="number" placeholder="Client ID" />
+      <input id="t-min" type="number" placeholder="Min Amount" />
+      <input id="t-max" type="number" placeholder="Max Amount" />
+
+      <button id="apply-transaction-filter">Apply Filter</button>
+    </div>
+
+    <!-- 🔽 TABLE -->
+    <div id="transactions-table"></div>
+  </section>
 
     <!-- ══ TAB: REPORTS ═══════════════════════════════════ -->
     <section id="tab-reports" class="tab-panel">

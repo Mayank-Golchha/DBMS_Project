@@ -151,6 +151,22 @@ async function loadAgents() {
   }
 }
 
+// load clients
+async function loadClients() {
+  const div = document.getElementById("clients-table");
+  const res = await fetch(`${API}/clients`);
+  const json = await res.json();
+  div.innerHTML = buildTable(json.data);
+}
+
+// load transaction
+async function loadTransactions() {
+  const div = document.getElementById("transactions-table");
+  const res = await fetch(`${API}/transactions`);
+  const json = await res.json();
+  div.innerHTML = buildTable(json.data);
+}
+
 // ── ADD PROPERTY form ──────────────────────────────────────
 async function loadLocalities(retries = 5) {
   const sel = document.getElementById("f-locality");
@@ -281,9 +297,86 @@ document.querySelectorAll(".btn-report").forEach((btn) => {
   });
 });
 
+
+document.getElementById("apply-transaction-filter")
+  ?.addEventListener("click", async () => {
+
+    const type  = document.getElementById("t-type").value;
+    const agent  = document.getElementById("t-agent").value;
+    const client = document.getElementById("t-client").value;
+    const min   = document.getElementById("t-min").value;
+    const max   = document.getElementById("t-max").value;
+
+    let url = `${API}/reports/transaction-filter?`;
+
+    if (type)  url += `type=${type}&`;
+    if (agent) url += `agent_id=${agent}&`;
+    if (client) url += `client_id=${client}&`;
+    if (min)   url += `min_amount=${min}&`;
+    if (max)   url += `max_amount=${max}`;
+
+    const res  = await fetch(url);
+    const json = await res.json();
+
+    document.getElementById("transactions-table").innerHTML = buildTable(json.data);
+});
+
+document.getElementById("apply-client-filter")
+  ?.addEventListener("click", async () => {
+
+    const type  = document.getElementById("c-type").value;
+    const min   = document.getElementById("c-min-budget").value;
+    const max   = document.getElementById("c-max-budget").value;
+    const loc   = document.getElementById("c-location").value;
+
+    let url = `${API}/clients?`;
+
+    if (type) url += `type=${type}&`;
+    if (min)  url += `min_budget=${min}&`;
+    if (max)  url += `max_budget=${max}&`;
+    if (loc)  url += `location=${encodeURIComponent(loc)}&`;
+
+    const res  = await fetch(url);
+    const json = await res.json();
+
+    document.getElementById("clients-table").innerHTML = buildTable(json.data);
+});
+
+document.getElementById("apply-agent-filter")
+  ?.addEventListener("click", async () => {
+
+    const name   = document.getElementById("a-name").value;
+    const sales  = document.getElementById("a-min-sales").value;
+    const rent   = document.getElementById("a-min-rentals").value;
+
+    let url = `${API}/agents?`;
+
+    if (name)  url += `name=${encodeURIComponent(name)}&`;
+    if (sales) url += `min_sales=${sales}&`;
+    if (rent)  url += `min_rentals=${rent}&`;
+
+    const res  = await fetch(url);
+    const json = await res.json();
+
+    document.getElementById("agent-grid").innerHTML = json.data.map((a) => `
+      <div class="agent-card">
+        <div class="agent-name">${a.first_name} ${a.last_name}</div>
+        <div class="agent-meta">${a.email} · ${a.phone}</div>
+        <div class="agent-meta">License: ${a.license_no}</div>
+        <div class="agent-stats">
+          <div class="agent-stat"><div>${a.total_sales}</div><div>Sales</div></div>
+          <div class="agent-stat"><div>${a.total_rentals}</div><div>Rentals</div></div>
+        </div>
+      </div>
+    `).join("");
+});
+
+
 // ── Init ────────────────────────────────────────────────────
 loadProperties();
 loadLocalities();
 
 // Lazy-load agents when tab is activated
 document.querySelector('[data-tab="agents"]').addEventListener("click", loadAgents);
+document.querySelector('[data-tab="clients"]').addEventListener("click", loadClients);
+document.querySelector('[data-tab="transactions"]').addEventListener("click", loadTransactions);
